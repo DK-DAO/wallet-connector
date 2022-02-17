@@ -136,3 +136,5 @@ export function WalletConnector(props: IWalletConnectorProps) {
     </>
   );
 }
+
+export * from './core'
