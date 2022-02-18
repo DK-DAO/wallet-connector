@@ -47,28 +47,30 @@ export function WalletConnector(props: IWalletConnectorProps) {
   const [modalState, setModalState] = useState({ title: 'Unknown Error', message: 'Unknown error', type: 'info' });
   const [isConnected, setConnection] = useState(false);
 
-  useEffect(() =>
-    once('restore-previous-session', () => {
-      if (typeof localStorage !== 'undefined') {
-        const type = localStorage.getItem('wallet-connector-type') || '';
-        const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
-        if (type === 'metamask') {
-          const wallet = CoreMetaMask.getInstance();
-          if (wallet.isConnected()) {
-            wallet.connect(chainId).then(() => {
+  useEffect(
+    () =>
+      once('restore-previous-session', () => {
+        if (typeof localStorage !== 'undefined') {
+          const type = localStorage.getItem('wallet-connector-type') || '';
+          const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
+          if (type === 'metamask') {
+            const wallet = CoreMetaMask.getInstance();
+            if (wallet.isConnected()) {
+              wallet.connect(chainId).then(() => {
+                setConnection(true);
+              });
+              props.onConnect(null, wallet);
+            }
+          } else if (type === 'walletconnect') {
+            const wallet = CoreWalletConnect.getInstance();
+            if (wallet.isConnected()) {
               setConnection(true);
-            });
-            props.onConnect(null, wallet);
-          }
-        } else if (type === 'walletconnect') {
-          const wallet = CoreWalletConnect.getInstance();
-          if (wallet.isConnected()) {
-            setConnection(true);
-            props.onConnect(null, wallet);
+              props.onConnect(null, wallet);
+            }
           }
         }
-      }
-    }),
+      }),
+    [],
   );
 
   const overrideDispatch = (type: string, value: any) => dispatch({ type, value });
@@ -137,4 +139,4 @@ export function WalletConnector(props: IWalletConnectorProps) {
   );
 }
 
-export * from './core'
+export * from './core';
