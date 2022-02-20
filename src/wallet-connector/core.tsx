@@ -16,3 +16,8 @@ export interface IWallet {
   switchNetwork: (chainId: number) => Promise<boolean>;
   isConnected: () => boolean;
 }
+
+export enum EConnectType {
+  metamask = 'metamask',
+  walletconnect = 'walletconnect'
+}

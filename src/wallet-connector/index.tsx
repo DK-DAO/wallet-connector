@@ -6,7 +6,7 @@ import ModalMessage from './modal-message';
 import { DefaultWalletConnectorContext, WalletConnectorContext, WalletConnectorReducer } from './context';
 import { CoreMetaMask } from './core-meta-mask';
 import CoreWalletConnect from './core-wallet-connect';
-import { IWallet } from './core';
+import { IWallet, EConnectType } from './core';
 import { once } from '../utilities/singleton';
 
 declare let localStorage: any;
@@ -52,15 +52,17 @@ export function WalletConnector(props: IWalletConnectorProps) {
       if (typeof localStorage !== 'undefined') {
         const type = localStorage.getItem('wallet-connector-type') || '';
         const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
-        if (type === 'metamask') {
+        if (type === EConnectType.metamask) {
           const wallet = CoreMetaMask.getInstance();
           if (wallet.isConnected()) {
             wallet.connect(chainId).then(() => {
               setConnection(true);
             });
             props.onConnect(null, wallet);
+          } else {
+            onConnectMetamask()
           }
-        } else if (type === 'walletconnect') {
+        } else if (type === EConnectType.walletconnect) {
           const wallet = CoreWalletConnect.getInstance();
           if (wallet.isConnected()) {
             setConnection(true);
@@ -80,42 +82,50 @@ export function WalletConnector(props: IWalletConnectorProps) {
 
   const handleDialogClose = (connectType: string) => {
     if (connectType === 'metamask') {
-      if (typeof window.ethereum !== 'undefined') {
-        const wallet = CoreMetaMask.getInstance();
-        wallet
-          .connect(56)
-          .then((address: string) => {
-            if (typeof localStorage !== 'undefined') {
-              localStorage.setItem('wallet-connector-type', connectType);
-              localStorage.setItem('wallet-connector-chain-id', 56);
-            }
-            overrideDispatch('metamask-connected', { connected: true, type: connectType, address });
-            props.onConnect(null, wallet);
-            setConnection(true);
-          })
-          .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
-          .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
-      } else {
-        showModal('error', 'Metamask Not Found', "Metamask wallet wasn't installed");
-      }
+      onConnectMetamask();
     } else if (connectType === 'walletconnect') {
-      const wallet = CoreWalletConnect.getInstance();
+      onConnectWalletConnect();
+    } else {
+      overrideDispatch('close-dialog', { dialogOpen: false });
+    }
+  };
+
+  const onConnectMetamask = () => {
+    if (typeof window.ethereum !== 'undefined') {
+      const wallet = CoreMetaMask.getInstance();
       wallet
         .connect(56)
         .then((address: string) => {
           if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('wallet-connector-type', connectType);
+            localStorage.setItem('wallet-connector-type', EConnectType.metamask);
             localStorage.setItem('wallet-connector-chain-id', 56);
           }
-          overrideDispatch('walletconnect-connected', { connected: true, type: connectType, address });
+          overrideDispatch('metamask-connected', { connected: true, type: EConnectType.metamask, address });
           props.onConnect(null, wallet);
           setConnection(true);
         })
         .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
         .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
     } else {
-      overrideDispatch('close-dialog', { dialogOpen: false });
+      showModal('error', 'Metamask Not Found', "Metamask wallet wasn't installed");
     }
+  };
+
+  const onConnectWalletConnect = () => {
+    const wallet = CoreWalletConnect.getInstance();
+    wallet
+      .connect(56)
+      .then((address: string) => {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('wallet-connector-type', EConnectType.walletconnect);
+          localStorage.setItem('wallet-connector-chain-id', 56);
+        }
+        overrideDispatch('walletconnect-connected', { connected: true, type: EConnectType.walletconnect, address });
+        props.onConnect(null, wallet);
+        setConnection(true);
+      })
+      .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
+      .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
   };
 
   const handleButtonConnect = () => {
@@ -137,4 +147,4 @@ export function WalletConnector(props: IWalletConnectorProps) {
   );
 }
 
-export * from './core'
+export * from './core';
