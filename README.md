@@ -2,12 +2,6 @@
 
 Wallet Connector
 
-## Available Scripts
-
-### `yarn dev`
-
-### `yarn demo`
-
 ## For development
 
 ```
