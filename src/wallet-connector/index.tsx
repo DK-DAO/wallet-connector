@@ -47,6 +47,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
   const [isConnected, setConnection] = useState(false);
 
   useEffect(() => {
+    console.log(23);
     if (typeof localStorage !== 'undefined') {
       const type = localStorage.getItem('wallet-connector-type') || '';
       const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
