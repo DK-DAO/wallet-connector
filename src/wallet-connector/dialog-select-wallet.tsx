@@ -6,11 +6,18 @@ import ListItemText from '@mui/material/ListItemText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import { WalletConnectorContext } from './context';
-import { toKey } from './utilities';
+import { toCamelCase, toKey } from './utilities';
+import metaMaskIcon from '../static/metamask.png';
+import walletConnectIcon from '../static/walletconnect.png';
 
 const supportedWallets = ['MetaMask', 'WalletConnect'];
 
 export function WalletConnectorDialog(props: { onClose: (_connectType: string) => void }) {
+  const images = {
+    metaMask: metaMaskIcon,
+    walletConnect: walletConnectIcon,
+  };
+
   return (
     <WalletConnectorContext.Consumer>
       {({ dialogOpen }) => (
@@ -20,7 +27,7 @@ export function WalletConnectorDialog(props: { onClose: (_connectType: string) =
             {supportedWallets.map((item) => (
               <ListItem button onClick={() => props.onClose(toKey(item))} key={toKey(item)}>
                 <ListItemAvatar>
-                  <Avatar src={`/static/${toKey(item)}.png`}></Avatar>
+                  <Avatar src={images[toCamelCase(item)]} />
                 </ListItemAvatar>
                 <ListItemText primary={item} />
               </ListItem>
