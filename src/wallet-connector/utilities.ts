@@ -22,3 +22,10 @@ export const once = (name: string, callback: () => void) => {
 };
 
 export const toKey = (v: string): string => v.toLowerCase().replace(/\s/g, '');
+
+export const toCamelCase = (v: string): string =>
+  v
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index: number) => {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, '');
