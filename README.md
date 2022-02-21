@@ -1,15 +1,15 @@
 # wallet-connector
+
 Wallet Connector
 
-## Available Scripts
-
-### `yarn install`
-### `yarn build`
-
-## Run example
+## For development
 
 ```
-    cd demo 
-    yarn install
-    yarn start
+    yarn dev
+```
+
+## For integration and testing in demo
+
+```
+    yarn demo
 ```
