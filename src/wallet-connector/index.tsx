@@ -7,7 +7,6 @@ import { DefaultWalletConnectorContext, WalletConnectorContext, WalletConnectorR
 import { CoreMetaMask } from './core-meta-mask';
 import CoreWalletConnect from './core-wallet-connect';
 import { IWallet, EConnectType } from './core';
-import { once } from '../utilities/singleton';
 
 declare let localStorage: any;
 
@@ -47,31 +46,29 @@ export function WalletConnector(props: IWalletConnectorProps) {
   const [modalState, setModalState] = useState({ title: 'Unknown Error', message: 'Unknown error', type: 'info' });
   const [isConnected, setConnection] = useState(false);
 
-  useEffect(() =>
-    once('restore-previous-session', () => {
-      if (typeof localStorage !== 'undefined') {
-        const type = localStorage.getItem('wallet-connector-type') || '';
-        const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
-        if (type === EConnectType.metamask) {
-          const wallet = CoreMetaMask.getInstance();
-          if (wallet.isConnected()) {
-            wallet.connect(chainId).then(() => {
-              setConnection(true);
-            });
-            props.onConnect(null, wallet);
-          } else {
-            onConnectMetamask()
-          }
-        } else if (type === EConnectType.walletconnect) {
-          const wallet = CoreWalletConnect.getInstance();
-          if (wallet.isConnected()) {
+  useEffect(() => {
+    if (typeof localStorage !== 'undefined') {
+      const type = localStorage.getItem('wallet-connector-type') || '';
+      const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
+      if (type === EConnectType.metamask) {
+        const wallet = CoreMetaMask.getInstance();
+        if (wallet.isConnected()) {
+          wallet.connect(chainId).then(() => {
             setConnection(true);
-            props.onConnect(null, wallet);
-          }
+          });
+          props.onConnect(null, wallet);
+        } else {
+          onConnectMetamask();
+        }
+      } else if (type === EConnectType.walletconnect) {
+        const wallet = CoreWalletConnect.getInstance();
+        if (wallet.isConnected()) {
+          setConnection(true);
+          props.onConnect(null, wallet);
         }
       }
-    }),
-  );
+    }
+  }, []);
 
   const overrideDispatch = (type: string, value: any) => dispatch({ type, value });
 
