@@ -86,7 +86,9 @@ export class CoreWalletConnect implements IWallet {
     });
   }
 
-  public disconnect: () => Promise<any>;
+  public async disconnect(): Promise<any> {
+    await this.walletConnectInstance.killSession()
+  };
 
   public async getAddress(): Promise<string> {
     if (!ethers.utils.isAddress(this.address)) {

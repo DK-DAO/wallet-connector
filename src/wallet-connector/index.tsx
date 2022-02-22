@@ -48,7 +48,7 @@ export const DefaultChainID = 56; //Binance Smart Chain
 export function WalletConnector(props: IWalletConnectorProps) {
   const [context, dispatch] = useReducer(WalletConnectorReducer, DefaultWalletConnectorContext);
   const [modalState, setModalState] = useState({ title: 'Unknown Error', message: 'Unknown error', type: 'info' });
-  const [isConnected, setConnection] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
@@ -58,7 +58,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
         const wallet = CoreMetaMask.getInstance();
         if (wallet.isConnected()) {
           wallet.connect(chainId).then(() => {
-            setConnection(true);
+            setIsConnected(true);
           });
           props.onConnect(null, wallet);
         } else {
@@ -67,7 +67,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
       } else if (type === EConnectType.walletconnect) {
         const wallet = CoreWalletConnect.getInstance();
         if (wallet.isConnected()) {
-          setConnection(true);
+          setIsConnected(true);
           props.onConnect(null, wallet);
         }
       }
@@ -111,7 +111,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
           }
           overrideDispatch('metamask-connected', { connected: true, type: EConnectType.metamask, address });
           props.onConnect(null, wallet);
-          setConnection(true);
+          setIsConnected(true);
         })
         .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
         .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
@@ -131,46 +131,44 @@ export function WalletConnector(props: IWalletConnectorProps) {
         }
         overrideDispatch('walletconnect-connected', { connected: true, type: EConnectType.walletconnect, address });
         props.onConnect(null, wallet);
-        setConnection(true);
+        setIsConnected(true);
       })
       .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
       .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
   };
 
   const handleButtonConnect = () => {
+    overrideDispatch('open-dialog', { dialogOpen: true });
+  };
+
+  const handleButtonDisconnect = async () => {
     if (isConnected) {
-      const type = localStorage.getItem('wallet-connector-type') ?? '';
-      switch (type) {
+      const connectType = localStorage.getItem('wallet-connector-type') || '';
+      
+      switch (connectType) {
         case EConnectType.metamask: {
-          localStorage.removeItem('wallet-connector-type');
-          localStorage.removeItem('wallet-connector-chain-id');
-          props.onDisconnect(null);
+          const wallet = CoreMetaMask.getInstance();
+          await wallet.disconnect();
           break;
         }
         case EConnectType.walletconnect: {
+          const wallet = CoreWalletConnect.getInstance();
+          await wallet.disconnect();
           break;
         }
         default:
           break;
       }
-      setConnection(false);
-      return;
+      
+      setIsConnected(false);
+      localStorage.removeItem('wallet-connector-type');
+      localStorage.removeItem('wallet-connector-chain-id');
+      overrideDispatch('metamask-connected', { connected: false, type: 'unknown', address: '' });
+      props.onDisconnect(null);
     }
-    overrideDispatch('open-dialog', { dialogOpen: true });
   };
 
-  const handleButtonDisconnect = () => {
-    const connectType = localStorage.getItem('wallet-connector-type') || '';
-    if (connectType === 'metamask') {
-      if (typeof window.ethereum !== 'undefined') {
-        console.log("Disconnect metamask")
-      } else {
-        showModal('error', 'Metamask Not Found', "Metamask wallet wasn't installed");
-      }
-    } else if(connectType === 'walletconnect') {
-      console.log("Disconnect wallet connect")
-    } 
-  };
+  console.log(context);
 
   return (
     <>
@@ -184,9 +182,6 @@ export function WalletConnector(props: IWalletConnectorProps) {
             Disconnect
           </Button>
         )}
-        <Button variant="contained" onClick={handleButtonConnect}>
-          {!isConnected ? 'Connect' : 'Disconnect'}
-        </Button>
         <WalletConnectorDialog onClose={handleDialogClose} />
         <ModalMessage type={modalState.type} title={modalState.title}>
           {modalState.message}
