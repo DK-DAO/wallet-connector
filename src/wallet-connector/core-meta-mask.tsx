@@ -49,6 +49,8 @@ export class CoreMetaMask implements IWallet {
     return walletAddress;
   }
 
+  public disconnect: () => Promise<any>;
+
   public async getAddress(): Promise<string> {
     if (ethereum.selectedAddress !== null && !ethers.utils.isAddress(this.address)) {
       // Try to reconnect to correct the issue

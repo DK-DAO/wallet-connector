@@ -42,7 +42,7 @@ export const SupportedNetwork = new Map<number, string>([
   [4002, 'Fantom Testnet'],
 ]);
 
-export const DefaultChainID = 56 //Binance Smart Chain
+export const DefaultChainID = 56; //Binance Smart Chain
 
 export function WalletConnector(props: IWalletConnectorProps) {
   const [context, dispatch] = useReducer(WalletConnectorReducer, DefaultWalletConnectorContext);
@@ -140,12 +140,31 @@ export function WalletConnector(props: IWalletConnectorProps) {
     overrideDispatch('open-dialog', { dialogOpen: true });
   };
 
+  const handleButtonDisconnect = () => {
+    const connectType = localStorage.getItem('wallet-connector-type') || '';
+    if (connectType === 'metamask') {
+      if (typeof window.ethereum !== 'undefined') {
+        console.log("Disconnect metamask")
+      } else {
+        showModal('error', 'Metamask Not Found', "Metamask wallet wasn't installed");
+      }
+    } else if(connectType === 'walletconnect') {
+      console.log("Disconnect wallet connect")
+    } 
+  };
+
   return (
     <>
       <WalletConnectorContext.Provider value={{ ...context, dispatch: overrideDispatch }}>
-        <Button variant="contained" onClick={handleButtonConnect} disabled={isConnected}>
-          {!isConnected ? 'Connect' : 'Disconnect'}
-        </Button>
+        {!isConnected ? (
+          <Button variant="contained" onClick={handleButtonConnect}>
+            Connect
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={handleButtonDisconnect}>
+            Disconnect
+          </Button>
+        )}
         <WalletConnectorDialog onClose={handleDialogClose} />
         <ModalMessage type={modalState.type} title={modalState.title}>
           {modalState.message}
