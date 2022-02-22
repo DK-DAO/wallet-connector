@@ -106,6 +106,10 @@ export class CoreWalletConnect implements IWallet {
   public isConnected(): boolean {
     return this.connected;
   }
+
+  public async signMessage(message: string): Promise<string> {
+    return this.walletConnectInstance.signPersonalMessage([message, this.getAddress]);
+  }
 }
 
 export default CoreWalletConnect;
