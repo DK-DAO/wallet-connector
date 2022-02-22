@@ -50,8 +50,8 @@ export class CoreWalletConnect implements IWallet {
         return this.reject(error);
       }
       // Get provided accounts and chainId
-      const { accounts } = payload.params[0];
-      if (payload.params[0][1] !== this.chainId) {
+      const { accounts, chainId } = payload.params[0];
+      if (chainId !== this.chainId) {
         return this.reject(new Error('WalletConnect Error: ChainId is different'));
       }
       this.address = accounts[0] as string;
@@ -108,7 +108,7 @@ export class CoreWalletConnect implements IWallet {
   }
 
   public async signMessage(message: string): Promise<string> {
-    return this.walletConnectInstance.signPersonalMessage([message, this.getAddress]);
+    return this.walletConnectInstance.signPersonalMessage([message, await this.getAddress()]);
   }
 }
 

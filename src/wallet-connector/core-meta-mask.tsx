@@ -84,7 +84,7 @@ export class CoreMetaMask implements IWallet {
   public async signMessage(message: string): Promise<string> {
     return ethereum.request({
       method: 'personal_sign',
-      params: [message, this.getAddress()],
+      params: [message, await this.getAddress()],
     });
   }
 }
