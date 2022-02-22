@@ -32,6 +32,7 @@ export interface IWalletConnectorState {
 export interface IWalletConnectorProps {
   onConnect: (error: Error | null, walletInstance: IWallet) => void;
   chainId?: number;
+  onDisconnect: (error: Error | null) => void;
 }
 
 export const SupportedNetwork = new Map<number, string>([
@@ -137,6 +138,24 @@ export function WalletConnector(props: IWalletConnectorProps) {
   };
 
   const handleButtonConnect = () => {
+    if (isConnected) {
+      const type = localStorage.getItem('wallet-connector-type') ?? '';
+      switch (type) {
+        case EConnectType.metamask: {
+          localStorage.removeItem('wallet-connector-type');
+          localStorage.removeItem('wallet-connector-chain-id');
+          props.onDisconnect(null);
+          break;
+        }
+        case EConnectType.walletconnect: {
+          break;
+        }
+        default:
+          break;
+      }
+      setConnection(false);
+      return;
+    }
     overrideDispatch('open-dialog', { dialogOpen: true });
   };
 
@@ -165,6 +184,9 @@ export function WalletConnector(props: IWalletConnectorProps) {
             Disconnect
           </Button>
         )}
+        <Button variant="contained" onClick={handleButtonConnect}>
+          {!isConnected ? 'Connect' : 'Disconnect'}
+        </Button>
         <WalletConnectorDialog onClose={handleDialogClose} />
         <ModalMessage type={modalState.type} title={modalState.title}>
           {modalState.message}

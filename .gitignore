@@ -106,3 +106,5 @@ dist
 # Built folder
 build
 lib
+
+.idea

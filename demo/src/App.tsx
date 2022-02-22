@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { IWallet, WalletConnector } from 'wallet-connector';
 import './App.css';
 
@@ -15,10 +15,17 @@ function App() {
     }
   };
 
+  const onDisconnect = useCallback((error: Error | null) => {
+    if (!error) {
+      setWallet(null);
+      setAddress(null);
+    }
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
-        <WalletConnector onConnect={onConnect} chainId={56} />
+        <WalletConnector onConnect={onConnect} chainId={56} onDisconnect={onDisconnect} />
         <div>
           <p>Connected address: {address || '...'}</p>
         </div>
