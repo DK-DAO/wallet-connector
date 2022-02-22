@@ -31,6 +31,7 @@ export interface IWalletConnectorState {
 
 export interface IWalletConnectorProps {
   onConnect: (error: Error | null, walletInstance: IWallet) => void;
+  chainId?: number;
 }
 
 export const SupportedNetwork = new Map<number, string>([
@@ -41,6 +42,8 @@ export const SupportedNetwork = new Map<number, string>([
   [4002, 'Fantom Testnet'],
 ]);
 
+export const DefaultChainID = 56 //Binance Smart Chain
+
 export function WalletConnector(props: IWalletConnectorProps) {
   const [context, dispatch] = useReducer(WalletConnectorReducer, DefaultWalletConnectorContext);
   const [modalState, setModalState] = useState({ title: 'Unknown Error', message: 'Unknown error', type: 'info' });
@@ -49,7 +52,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
       const type = localStorage.getItem('wallet-connector-type') || '';
-      const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || 56);
+      const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || getChainId());
       if (type === EConnectType.metamask) {
         const wallet = CoreMetaMask.getInstance();
         if (wallet.isConnected()) {
@@ -77,6 +80,14 @@ export function WalletConnector(props: IWalletConnectorProps) {
     overrideDispatch('open-modal', { modalOpen: true });
   };
 
+  const getChainId = () => {
+    if (props.chainId) {
+      if (!SupportedNetwork.get(props.chainId)) throw new Error('Unsupported network with chain Id ' + props.chainId);
+      return props.chainId;
+    }
+    return DefaultChainID;
+  };
+
   const handleDialogClose = (connectType: string) => {
     if (connectType === 'metamask') {
       onConnectMetamask();
@@ -91,11 +102,11 @@ export function WalletConnector(props: IWalletConnectorProps) {
     if (typeof window.ethereum !== 'undefined') {
       const wallet = CoreMetaMask.getInstance();
       wallet
-        .connect(56)
+        .connect(getChainId())
         .then((address: string) => {
           if (typeof localStorage !== 'undefined') {
             localStorage.setItem('wallet-connector-type', EConnectType.metamask);
-            localStorage.setItem('wallet-connector-chain-id', 56);
+            localStorage.setItem('wallet-connector-chain-id', getChainId());
           }
           overrideDispatch('metamask-connected', { connected: true, type: EConnectType.metamask, address });
           props.onConnect(null, wallet);
@@ -111,11 +122,11 @@ export function WalletConnector(props: IWalletConnectorProps) {
   const onConnectWalletConnect = () => {
     const wallet = CoreWalletConnect.getInstance();
     wallet
-      .connect(56)
+      .connect(getChainId())
       .then((address: string) => {
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('wallet-connector-type', EConnectType.walletconnect);
-          localStorage.setItem('wallet-connector-chain-id', 56);
+          localStorage.setItem('wallet-connector-chain-id', getChainId());
         }
         overrideDispatch('walletconnect-connected', { connected: true, type: EConnectType.walletconnect, address });
         props.onConnect(null, wallet);

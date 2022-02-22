@@ -18,7 +18,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <WalletConnector onConnect={onConnect} />
+        <WalletConnector onConnect={onConnect} chainId={56} />
         <div>
           <p>Connected address: {address || '...'}</p>
         </div>
