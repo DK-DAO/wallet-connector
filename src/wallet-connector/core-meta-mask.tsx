@@ -7,7 +7,8 @@ type TRpcMethod =
   | 'eth_requestAccounts'
   | 'eth_sendTransaction'
   | 'wallet_switchEthereumChain'
-  | 'wallet_addEthereumChain';
+  | 'wallet_addEthereumChain'
+  | 'personal_sign';
 
 declare let ethereum: {
   request: (rpcRequest: { method: TRpcMethod; params?: any[] }) => Promise<any>;
@@ -80,6 +81,13 @@ export class CoreMetaMask implements IWallet {
 
   public isConnected(): boolean {
     return ethers.utils.isAddress(ethereum.selectedAddress || '');
+  }
+
+  public async signMessage(message: string): Promise<string> {
+    return ethereum.request({
+      method: 'personal_sign',
+      params: [message, await this.getAddress()],
+    });
   }
 }
 
