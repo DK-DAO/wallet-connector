@@ -163,12 +163,10 @@ export function WalletConnector(props: IWalletConnectorProps) {
       setIsConnected(false);
       localStorage.removeItem('wallet-connector-type');
       localStorage.removeItem('wallet-connector-chain-id');
-      overrideDispatch('metamask-connected', { connected: false, type: 'unknown', address: '' });
+      overrideDispatch('wallet-disconnected', DefaultWalletConnectorContext);
       props.onDisconnect(null);
     }
   };
-
-  console.log(context);
 
   return (
     <>
