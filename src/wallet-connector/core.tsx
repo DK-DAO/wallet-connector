@@ -15,9 +15,10 @@ export interface IWallet {
   sendTransaction: (transaction: ITransaction) => Promise<string>;
   switchNetwork: (chainId: number) => Promise<boolean>;
   isConnected: () => boolean;
+  signMessage: (message: string) => Promise<string>;
 }
 
 export enum EConnectType {
   metamask = 'metamask',
-  walletconnect = 'walletconnect'
+  walletconnect = 'walletconnect',
 }
