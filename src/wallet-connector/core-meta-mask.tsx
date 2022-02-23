@@ -52,7 +52,7 @@ export class CoreMetaMask implements IWallet {
   }
 
   public disconnect(): Promise<any> {
-    return Promise.resolve()
+    return Promise.resolve();
   }
 
   public onDisconnect(cbFn: (err: Error | null) => void): void {
@@ -60,7 +60,7 @@ export class CoreMetaMask implements IWallet {
       if (cbFn && typeof cbFn === 'function') {
         cbFn(null);
       }
-    })
+    });
   }
 
   public async getAddress(): Promise<string> {

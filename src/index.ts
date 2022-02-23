@@ -1,2 +1,2 @@
-export * from './wallet-connector'
-export * from './utilities'
+export * from './wallet-connector';
+export * from './utilities';

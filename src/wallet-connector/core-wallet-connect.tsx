@@ -93,8 +93,10 @@ export class CoreWalletConnect implements IWallet {
   }
 
   public onDisconnect(cbFn: (err: Error | null) => void) {
-    this.walletConnectInstance.on('disconnect',   (error: Error | null) => {
-      cbFn(error)
+    this.walletConnectInstance.on('disconnect', (error: Error | null) => {
+      cbFn(error);
+      this.address = '';
+      this.connected = false;
     });
   }
 
