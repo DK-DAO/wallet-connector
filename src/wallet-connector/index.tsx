@@ -89,11 +89,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
   };
 
   const getChainId = () => {
-    if (props.chainId) {
-      if (!SupportedNetwork.get(props.chainId)) throw new Error('Unsupported network with chain Id ' + props.chainId);
-      return props.chainId;
-    }
-    return DefaultChainID;
+    return props.chainId || DefaultChainID;
   };
 
   const handleDialogClose = (connectType: string) => {
@@ -151,6 +147,10 @@ export function WalletConnector(props: IWalletConnectorProps) {
   };
 
   const handleButtonConnect = () => {
+    if (props.chainId && !SupportedNetwork.get(props.chainId)) {
+      showModal('error', 'Unsupported network', 'Unsupported network with chain Id: ' + props.chainId);
+      return;
+    }
     overrideDispatch('open-dialog', { dialogOpen: true });
   };
 
