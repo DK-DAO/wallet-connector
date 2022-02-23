@@ -92,6 +92,12 @@ export class CoreWalletConnect implements IWallet {
     this.connected = false;
   }
 
+  public onDisconnect(cbFn: (err: Error | null) => void) {
+    this.walletConnectInstance.on('disconnect',   (error: Error | null) => {
+      cbFn(error)
+    });
+  }
+
   public async getAddress(): Promise<string> {
     if (!ethers.utils.isAddress(this.address)) {
       [this.address] = this.walletConnectInstance.accounts;

@@ -14,6 +14,7 @@ declare let ethereum: {
   request: (rpcRequest: { method: TRpcMethod; params?: any[] }) => Promise<any>;
   chainId: string;
   selectedAddress: string | null;
+  on: (event: string, handler: (error: any) => void) => void;
 };
 
 const singleton = new Map<string, any>();
@@ -52,6 +53,14 @@ export class CoreMetaMask implements IWallet {
 
   public disconnect(): Promise<any> {
     return Promise.resolve()
+  }
+
+  public onDisconnect(cbFn: (err: Error | null) => void): void {
+    ethereum.on('disconnect', () => {
+      if (cbFn && typeof cbFn === 'function') {
+        cbFn(null);
+      }
+    })
   }
 
   public async getAddress(): Promise<string> {

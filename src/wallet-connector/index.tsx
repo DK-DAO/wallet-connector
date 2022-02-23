@@ -60,6 +60,9 @@ export function WalletConnector(props: IWalletConnectorProps) {
           wallet.connect(chainId).then(() => {
             setIsConnected(true);
           });
+          wallet.onDisconnect(() => {
+            props.onDisconnect(null);
+          })
           props.onConnect(null, wallet);
         } else {
           onConnectMetamask();
@@ -68,6 +71,9 @@ export function WalletConnector(props: IWalletConnectorProps) {
         const wallet = CoreWalletConnect.getInstance();
         if (wallet.isConnected()) {
           setIsConnected(true);
+          wallet.onDisconnect((err) => {
+            props.onDisconnect(err)
+          })
           props.onConnect(null, wallet);
         }
       }
@@ -112,6 +118,9 @@ export function WalletConnector(props: IWalletConnectorProps) {
           overrideDispatch('metamask-connected', { connected: true, type: EConnectType.metamask, address });
           props.onConnect(null, wallet);
           setIsConnected(true);
+          wallet.onDisconnect(() => {
+            props.onDisconnect(null);
+          })
         })
         .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
         .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
@@ -132,6 +141,9 @@ export function WalletConnector(props: IWalletConnectorProps) {
         overrideDispatch('walletconnect-connected', { connected: true, type: EConnectType.walletconnect, address });
         props.onConnect(null, wallet);
         setIsConnected(true);
+        wallet.onDisconnect((err) => {
+          props.onDisconnect(err)
+        })
       })
       .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
       .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
@@ -144,7 +156,6 @@ export function WalletConnector(props: IWalletConnectorProps) {
   const handleButtonDisconnect = async () => {
     if (isConnected) {
       const connectType = localStorage.getItem('wallet-connector-type') || '';
-      
       switch (connectType) {
         case EConnectType.metamask: {
           const wallet = CoreMetaMask.getInstance();
