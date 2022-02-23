@@ -51,6 +51,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // Restore previous session
     if (typeof localStorage !== 'undefined') {
       const type = localStorage.getItem('wallet-connector-type') || '';
       const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || getChainId());
@@ -61,8 +62,8 @@ export function WalletConnector(props: IWalletConnectorProps) {
             setIsConnected(true);
           });
           wallet.onDisconnect(() => {
-            props.onDisconnect(null);
-          })
+            removeSessionAndDispatchDisconnectEvent();
+          });
           props.onConnect(null, wallet);
         } else {
           onConnectMetamask();
@@ -72,8 +73,8 @@ export function WalletConnector(props: IWalletConnectorProps) {
         if (wallet.isConnected()) {
           setIsConnected(true);
           wallet.onDisconnect((err) => {
-            props.onDisconnect(err)
-          })
+            removeSessionAndDispatchDisconnectEvent(err);
+          });
           props.onConnect(null, wallet);
         }
       }
@@ -119,8 +120,8 @@ export function WalletConnector(props: IWalletConnectorProps) {
           props.onConnect(null, wallet);
           setIsConnected(true);
           wallet.onDisconnect(() => {
-            props.onDisconnect(null);
-          })
+            removeSessionAndDispatchDisconnectEvent();
+          });
         })
         .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
         .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
@@ -142,8 +143,8 @@ export function WalletConnector(props: IWalletConnectorProps) {
         props.onConnect(null, wallet);
         setIsConnected(true);
         wallet.onDisconnect((err) => {
-          props.onDisconnect(err)
-        })
+          removeSessionAndDispatchDisconnectEvent(err);
+        });
       })
       .catch((err: Error) => showModal('error', err.message, err.stack || 'Unknown reason'))
       .finally(() => overrideDispatch('close-dialog', { dialogOpen: false }));
@@ -170,13 +171,16 @@ export function WalletConnector(props: IWalletConnectorProps) {
         default:
           break;
       }
-      
-      setIsConnected(false);
-      localStorage.removeItem('wallet-connector-type');
-      localStorage.removeItem('wallet-connector-chain-id');
-      overrideDispatch('wallet-disconnected', DefaultWalletConnectorContext);
-      props.onDisconnect(null);
+      removeSessionAndDispatchDisconnectEvent();
     }
+  };
+
+  const removeSessionAndDispatchDisconnectEvent = (error: any = null) => {
+    setIsConnected(false);
+    localStorage.removeItem('wallet-connector-type');
+    localStorage.removeItem('wallet-connector-chain-id');
+    overrideDispatch('wallet-disconnected', DefaultWalletConnectorContext);
+    props.onDisconnect(error);
   };
 
   return (

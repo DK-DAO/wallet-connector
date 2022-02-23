@@ -29,7 +29,8 @@
     "build:cjs": "tsc --module commonjs --outDir build/cjs && mkdir -p ./build/cjs/static && cp ./src/static/*.* ./build/cjs/static",
     "build": "yarn build:esm && yarn build:cjs",
     "dev": "npm-watch build",
-    "demo": "cd ./demo && yarn start"
+    "demo": "cd ./demo && yarn start",
+    "check": "npx prettier --check --write ./src/**/*"
   },
   "peerDependencies": {
     "react": "^16.8.0"
