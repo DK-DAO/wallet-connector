@@ -5,11 +5,13 @@ import './App.css';
 function App() {
   const [wallet, setWallet] = useState<null | IWallet>(null);
   const [address, setAddress] = useState<null | string>(null);
+  const [chainId, setChainId] = useState<number>(56);
 
-  const onConnect = (err: Error | null, wallet: IWallet) => {
+  const onConnect = (err: Error | null, connectedWallet: IWallet) => {
+    console.log(connectedWallet);
     if (err === null) {
-      setWallet(wallet);
-      wallet.getAddress().then((address) => setAddress(address));
+      setWallet(connectedWallet);
+      connectedWallet.getAddress().then((address) => setAddress(address));
     } else {
       setWallet(null);
     }
@@ -22,10 +24,17 @@ function App() {
     }
   }, []);
 
+  const handleInputChainId = (event: any) => {
+    setChainId(+event.target.value);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <WalletConnector onConnect={onConnect} chainId={56} onDisconnect={onDisconnect} />
+        <WalletConnector onConnect={onConnect} chainId={chainId} onDisconnect={onDisconnect} />
+        <div>
+          <input type={'number'} value={chainId} onChange={handleInputChainId}></input>
+        </div>
         <div>
           <p>Connected address: {address || '...'}</p>
         </div>

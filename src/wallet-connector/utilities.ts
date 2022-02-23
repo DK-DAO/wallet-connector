@@ -29,3 +29,17 @@ export const toCamelCase = (v: string): string =>
       return index === 0 ? word.toLowerCase() : word.toUpperCase();
     })
     .replace(/\s+/g, '');
+
+// export const getChainPropertiesLocal = (chainId: string, key: string) => {
+//   if (typeof localStorage !== 'undefined') {
+    
+//   }
+// }
+
+// export const saveChainPropertiesLocal = (chainId: string, key: string, value: string | number) => {
+
+// }
+
+// export const clearChainPropertiesLocal = (chainId: string) => {
+
+// }

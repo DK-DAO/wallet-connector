@@ -44,7 +44,8 @@ export const SupportedNetwork = new Map<number, string>([
 ]);
 
 export const DefaultChainID = 56; //Binance Smart Chain
-
+// lưu tất cả các instance vào local storage. Với metamask mình cần handle event change network
+// Với WalletConnect thì mình cần gi nhớ chain nào đã connect
 export function WalletConnector(props: IWalletConnectorProps) {
   const [context, dispatch] = useReducer(WalletConnectorReducer, DefaultWalletConnectorContext);
   const [modalState, setModalState] = useState({ title: 'Unknown Error', message: 'Unknown error', type: 'info' });
@@ -54,6 +55,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
     if (typeof localStorage !== 'undefined') {
       const type = localStorage.getItem('wallet-connector-type') || '';
       const chainId = Number(localStorage.getItem('wallet-connector-chain-id') || getChainId());
+
       if (type === EConnectType.metamask) {
         const wallet = CoreMetaMask.getInstance();
         if (wallet.isConnected()) {
@@ -74,6 +76,10 @@ export function WalletConnector(props: IWalletConnectorProps) {
     }
   }, []);
 
+  useEffect(() => {
+    console.log(props.chainId);
+  }, [props.chainId]);
+
   const overrideDispatch = (type: string, value: any) => dispatch({ type, value });
 
   const showModal = (type: string, title: string, message: string) => {
@@ -82,11 +88,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
   };
 
   const getChainId = () => {
-    if (props.chainId) {
-      if (!SupportedNetwork.get(props.chainId)) throw new Error('Unsupported network with chain Id ' + props.chainId);
-      return props.chainId;
-    }
-    return DefaultChainID;
+    return props.chainId || DefaultChainID;
   };
 
   const handleDialogClose = (connectType: string) => {
@@ -138,13 +140,17 @@ export function WalletConnector(props: IWalletConnectorProps) {
   };
 
   const handleButtonConnect = () => {
+    if (props.chainId && !SupportedNetwork.get(props.chainId)) {
+      showModal('error', 'Unsupported network', 'Unsupported network with chain Id ' + props.chainId);
+      return;
+    }
     overrideDispatch('open-dialog', { dialogOpen: true });
   };
 
   const handleButtonDisconnect = async () => {
     if (isConnected) {
       const connectType = localStorage.getItem('wallet-connector-type') || '';
-      
+
       switch (connectType) {
         case EConnectType.metamask: {
           const wallet = CoreMetaMask.getInstance();
@@ -159,7 +165,7 @@ export function WalletConnector(props: IWalletConnectorProps) {
         default:
           break;
       }
-      
+
       setIsConnected(false);
       localStorage.removeItem('wallet-connector-type');
       localStorage.removeItem('wallet-connector-chain-id');
