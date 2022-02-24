@@ -15,7 +15,7 @@
     "react-scripts": "5.0.0",
     "typescript": "^4.5.5",
     "web-vitals": "^2.1.4",
-    "wallet-connector": "link:.."
+    "@orochi-network/wallet-connector": "link:.."
   },
   "scripts": {
     "start": "react-scripts start",

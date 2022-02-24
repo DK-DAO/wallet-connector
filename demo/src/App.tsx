@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { IWallet, WalletConnector } from 'wallet-connector';
+import { IWallet, WalletConnector } from '@orochi-network/wallet-connector';
 import './App.css';
 
 function App() {
